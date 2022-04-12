@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: hsl(0, 0%, 15%);
+        overflow-x: scroll;
+        color: aliceblue;
+        padding: 20px;
+      }
+      section {
+        margin-top: -100px;
+        width: 100px;
+        height: 100px;
+      }
+      svg {
+        display: block;
+        width: 100vw;
+        height: 100vw;
+      }
+      #choose-pic {
+        display: inline-block;
+      }
+      #upload-img {
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="choose-pic">
+      <input
+        id="upload-img"
+        type="file"
+        accept="image/png,image/jpg,image/webp"
+      />
+      <canvas id="preview"></canvas>
+    </div>
+    <div class="word-graph">222222222222</div>
+    <!-- <section id="canvas"></section> -->
+
+    <script>
+      (function () {
+        function colorTick(color) {
+          if (color > Number("0xeeeeee")) {
+            return "a";
+          } else if (color > Number("0xdddddd")) {
+            return "a";
+          } else if (color > Number("0xaaaaaa")) {
+            return "a";
+          } else if (color > Number("0x777777")) {
+            return "0";
+          } else {
+            return "0";
+          }
+        }
+        function Color() {
+          this.compare = (current, target) => {
+            return current > target;
+          };
+          this.toHexadecimal = (R, G, B, A) => {
+            let r =
+              R.toString("16").length === 1
+                ? `0${R.toString("16")}`
+                : R.toString("16");
+            let g =
+              G.toString("16").length === 1
+                ? `0${G.toString("16")}`
+                : G.toString("16");
+            let b =
+              B.toString("16").length === 1
+                ? `0${B.toString("16")}`
+                : B.toString("16");
+            return r + g + b;
+          };
+          this.getPiexlChar = (R, G, B, A) => {
+            let colorNum = Number("0x" + this.toHexadecimal(R, G, B, A));
+            return colorTick(colorNum);
+          };
+        }
+        var imgloader = document.querySelector("#upload-img");
+        var colorHelper = new Color();
+        var charGraph;
+        imgloader.addEventListener("change", (e) => {
+          const files = e.target.files;
+          const imgurl = URL.createObjectURL(files[0]);
+          const image = new Image();
+          image.src = imgurl;
+          // document.body.appendChild(image);
+          image.onload = function (e) {
+            let rate = this.width / this.height;
+            const width = 80;
+            const height = width / rate;
+            preview.width = width;
+            preview.height = height;
+            ctx.drawImage(
+              this,
+              0,
+              0,
+              this.width,
+              this.height,
+              0,
+              0,
+              width,
+              height
+            );
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              preview.width,
+              preview.height
+            ).data;
+            console.log(imageData);
+            let html = "";
+            for (let row = 0; row < preview.height; row++) {
+              for (let col = 0; col < preview.width; col++) {
+                let index = (row * preview.width + col) * 4;
+                let R = imageData[index];
+                let G = imageData[index + 1];
+                let B = imageData[index + 2];
+                let A = imageData[index + 3];
+                html += colorHelper.getPiexlChar(R, G, B, A);
+              }
+              html += "<br/>";
+            }
+            console.log(html);
+            wordContainer.innerHTML = html;
+          };
+        });
+        var preview = document.querySelector("#preview");
+        var ctx = preview.getContext("2d");
+        var wordContainer = document.querySelector(".word-graph");
+      })();
+    </script>
+  </body>
+</html>
